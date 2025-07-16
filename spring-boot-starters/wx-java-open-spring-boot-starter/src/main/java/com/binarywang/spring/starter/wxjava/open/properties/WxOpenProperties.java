@@ -116,7 +116,7 @@ public class WxOpenProperties {
     /**
      * 读数据超时时间，即socketTimeout，单位毫秒
      */
-    private int soTimeout = 1;
+    private int soTimeout = 5000;
 
     /**
      * 从连接池获取链接的超时时间，单位毫秒
