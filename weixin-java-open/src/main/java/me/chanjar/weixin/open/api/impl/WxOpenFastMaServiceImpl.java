@@ -113,6 +113,11 @@ public class WxOpenFastMaServiceImpl extends WxMaServiceImpl implements WxOpenFa
   }
 
   @Override
+  public WxOpenGetAllCategoriesByTypeResult getAllCategoriesByType(String verifyType)  {
+    return null;
+  }
+
+  @Override
   public WxOpenResult addCategory(List<WxFastMaCategory> categoryList) throws WxErrorException {
     Map<String, Object> map = new HashMap<>();
     map.put("categories", categoryList);

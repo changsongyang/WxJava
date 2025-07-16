@@ -95,6 +95,14 @@ public class WxOpenMaBasicServiceImpl implements WxOpenMaBasicService {
   }
 
   @Override
+  public WxOpenGetAllCategoriesByTypeResult getAllCategoriesByType(String verifyType) throws WxErrorException {
+    JsonObject params = new JsonObject();
+    params.addProperty("verify_type", verifyType);
+    String response = wxMaService.post(OPEN_GET_ALL_CATEGORIES_BY_TYPE, params);
+    return WxOpenGsonBuilder.create().fromJson(response, WxOpenGetAllCategoriesByTypeResult.class);
+  }
+
+  @Override
   public WxOpenResult addCategory(List<WxFastMaCategory> categoryList) throws WxErrorException {
     Map<String, Object> map = new HashMap<>();
     map.put("categories", categoryList);
