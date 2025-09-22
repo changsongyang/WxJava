@@ -27,15 +27,21 @@ public class WxEntrustPapServiceImpl implements WxEntrustPapService {
 
   @Override
   public String mpSign(WxMpEntrustRequest wxMpEntrustRequest) throws WxPayException {
+    wxMpEntrustRequest.checkAndSign(payService.getConfig());
     StringBuilder signStrTemp = new StringBuilder(payService.getPayBaseUrl() + "/papay/entrustweb");
     signStrTemp.append("?appid=").append(wxMpEntrustRequest.getAppid());
     signStrTemp.append("&contract_code=").append(wxMpEntrustRequest.getContractCode());
     signStrTemp.append("&contract_display_account=").append(URLEncoder.encode(wxMpEntrustRequest.getContractDisplayAccount()));
     signStrTemp.append("&mch_id=").append(wxMpEntrustRequest.getMchId()).append("&notify_url=").append(URLEncoder.encode(wxMpEntrustRequest.getNotifyUrl()));
-    signStrTemp.append("&plan_id=").append(wxMpEntrustRequest.getPlanId()).append("&outerid=").append(URLEncoder.encode(wxMpEntrustRequest.getOuterId()));
+    signStrTemp.append("&plan_id=").append(wxMpEntrustRequest.getPlanId());
     signStrTemp.append("&request_serial=").append(wxMpEntrustRequest.getRequestSerial()).append("&timestamp=").append(wxMpEntrustRequest.getTimestamp());
-    signStrTemp.append("&version=").append(wxMpEntrustRequest.getVersion()).append("&return_web=").append(wxMpEntrustRequest.getReturnWeb()).append("&sign=").append(wxMpEntrustRequest.getSign());
-
+    if (StringUtils.isNotEmpty(wxMpEntrustRequest.getReturnWeb())) {
+      signStrTemp.append("&return_web=").append(wxMpEntrustRequest.getReturnWeb());
+    }
+    if (StringUtils.isNotEmpty(wxMpEntrustRequest.getOuterId())) {
+      signStrTemp.append("&outerid=").append(URLEncoder.encode(wxMpEntrustRequest.getOuterId()));
+    }
+    signStrTemp.append("&version=").append(wxMpEntrustRequest.getVersion()).append("&sign=").append(wxMpEntrustRequest.getSign());
     return signStrTemp.toString();
   }
 
