@@ -1,18 +1,11 @@
 package me.chanjar.weixin.common.util.locks;
 
 import lombok.Getter;
-import org.springframework.data.redis.connection.RedisStringCommands;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.data.redis.core.types.Expiration;
-import org.springframework.data.redis.serializer.RedisSerializer;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -72,17 +65,16 @@ public class RedisTemplateSimpleDistributedLock implements Lock {
       value = UUID.randomUUID().toString();
       valueThreadLocal.set(value);
     }
-    RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
-    RedisSerializer<String> valueSerializer = (RedisSerializer<String>) redisTemplate.getValueSerializer();
-    final byte[] keyBytes = Objects.requireNonNull(keySerializer.serialize(key));
-    final byte[] valueBytes = Objects.requireNonNull(valueSerializer.serialize(value));
-    List<Object> redisResults = redisTemplate.executePipelined((RedisCallback<String>) connection -> {
-      connection.set(keyBytes, valueBytes, Expiration.milliseconds(leaseMilliseconds), RedisStringCommands.SetOption.SET_IF_ABSENT);
-      connection.get(keyBytes);
-      return null;
-    });
-    Object currentLockSecret = redisResults.size() > 1 ? redisResults.get(1) : redisResults.get(0);
-    return currentLockSecret != null && currentLockSecret.toString().equals(value);
+    
+    // Use high-level StringRedisTemplate API to ensure consistent key serialization
+    Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(key, value, leaseMilliseconds, TimeUnit.MILLISECONDS);
+    if (Boolean.TRUE.equals(lockAcquired)) {
+      return true;
+    }
+    
+    // Check if we already hold the lock (reentrant behavior)
+    String currentValue = redisTemplate.opsForValue().get(key);
+    return value.equals(currentValue);
   }
 
   @Override
